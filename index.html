@@ -3,10 +3,11 @@
 <html lang="ru">
 <head>
 <meta charset="utf-8"/>
-<title>Тренажёр (ручная проверка)</title>
+<title>Тест-тренажёр БХ 2 этап</title>
 <meta content="width=device-width, initial-scale=1" name="viewport"/>
 
   <style>
+
   :root {
     --gap: 10px;
     --bg-color: #1e1e1e;
@@ -17,7 +18,22 @@
     --button-hover: #3c3c3c;
     --button-text: #ffffff;
     --accent: #6ba4ff;
+    --border-color: #444;
   }
+
+  /* светлая тема */
+  .light {
+    --bg-color: #ffffff;
+    --panel-color: #f4f4f4;
+    --text-color: #1e1e1e;
+    --muted: #555;
+    --button-bg: #e0e0e0;
+    --button-hover: #d5d5d5;
+    --button-text: #000;
+    --accent: #0066cc;
+    --border-color: #ccc;
+  }
+
   body {
     font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
     margin: 20px;
@@ -27,22 +43,27 @@
   h2 { margin: 0 0 10px 0; }
   .row { display: flex; gap: var(--gap); flex-wrap: wrap; align-items: center; }
   #question { white-space: pre-line; font-weight: 600; margin: 10px 0; }
-  #answerInput { width: 100%; min-height: 110px; padding: 10px; font-size: 16px; background: #2b2b2b; color: var(--text-color); border: 1px solid #444; border-radius: 8px; }
+  #answerInput { width: 100%; min-height: 110px; padding: 10px; font-size: 16px; background: var(--panel-color); color: var(--text-color); border: 1px solid var(--border-color); border-radius: 8px; }
   button { padding: 8px 12px; border: none; border-radius: 10px; cursor: pointer; background: var(--button-bg); color: var(--button-text); transition: background 0.15s ease; }
   button:hover:not(:disabled) { background: var(--button-hover); }
   button:disabled { opacity: .45; cursor: not-allowed; }
-  #correctBox { white-space: pre-line; padding: 10px; background: #232323; border-radius: 8px; border: 1px solid #333; color: var(--accent); }
+  #correctBox { white-space: pre-line; padding: 10px; background: var(--panel-color); border-radius: 8px; border: 1px solid var(--border-color); color: var(--accent); }
   #result { font-weight: 700; }
-  .pill { padding: 4px 8px; border-radius: 999px; background: #2f2f2f; color: var(--muted); }
+  .pill { padding: 4px 8px; border-radius: 999px; background: var(--panel-color); color: var(--muted); border: 1px solid var(--border-color); }
   .spacer { height: 8px; }
-  .panel { border: 1px solid #333; border-radius: 12px; padding: 12px; background: var(--panel-color); box-shadow: 0 1px 6px rgba(0,0,0,.6); }
+  .panel { border: 1px solid var(--border-color); border-radius: 12px; padding: 12px; background: var(--panel-color); box-shadow: 0 1px 6px rgba(0,0,0,.6); }
   label { color: var(--muted); }
-  input[type="number"] { background:#222; color:var(--text-color); border:1px solid #444; border-radius:6px; padding:6px; width:80px; }
+  input[type="number"] { background: var(--panel-color); color: var(--text-color); border:1px solid var(--border-color); border-radius:6px; padding:6px; width:80px; }
   input[type="checkbox"] { transform:scale(1.05); }
-  
-  #checkBtn { display: none !important; }
 
+  #checkBtn { display: none !important; }
   #selfTestBox { display: none !important; visibility: hidden !important; height: 0 !important; margin: 0 !important; padding: 0 !important; }
+
+  /* кнопка переключения */
+  #themeToggle {
+    margin-left: auto;
+  }
+
 </style>
 
 
@@ -54,7 +75,10 @@
 
 </head>
 <body>
-<h2>Тест-тренажёр (вопросы: 600)</h2><div id="selfTestBox" style="display:none; white-space:pre-line; padding:10px; margin:10px 0; background:transparent; border:1px solid #333; border-radius:8px; color:var(--muted);"></div>
+<div class="row">
+  <h2>Тест-тренажёр БХ 2 этап</h2>
+  <button id="themeToggle">🌙/☀️</button>
+</div><div id="selfTestBox" style="display:none; white-space:pre-line; padding:10px; margin:10px 0; background:transparent; border:1px solid #333; border-radius:8px; color:var(--muted);"></div>
 <div class="panel row">
 <div class="row">
 <label>С: <input id="rangeStart" min="1" type="number" value="1"/></label>
@@ -1469,6 +1493,39 @@ document.addEventListener('keydown', function(e) {
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('service-worker.js').catch(function(err){ console.log('SW register failed', err); });
 }
+</script>
+
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  try {
+    const elRoot = document.documentElement;
+    const themeToggle = document.getElementById('themeToggle');
+    const systemPrefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const stored = localStorage.getItem('theme');
+    if (stored === 'light') {
+      elRoot.classList.add('light');
+    } else if (stored === 'dark') {
+      elRoot.classList.remove('light');
+    } else {
+      // no stored preference -> follow system (light if not dark)
+      if (!systemPrefersDark) elRoot.classList.add('light');
+      else elRoot.classList.remove('light');
+    }
+    if (themeToggle) {
+      // set initial icon
+      themeToggle.textContent = elRoot.classList.contains('light') ? '🌙' : '☀️';
+      themeToggle.addEventListener('click', function() {
+        elRoot.classList.toggle('light');
+        if (elRoot.classList.contains('light')) localStorage.setItem('theme', 'light');
+        else localStorage.setItem('theme', 'dark');
+        themeToggle.textContent = elRoot.classList.contains('light') ? '🌙' : '☀️';
+      });
+    }
+  } catch (e) {
+    console.error('Theme toggle init error', e);
+  }
+});
 </script>
 
 </body>
